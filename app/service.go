@@ -26,7 +26,7 @@ func (service Service) call(ctx context.Context, config string) error {
 	req, _ := http.NewRequestWithContext(
 		ctx,
 		"GET",
-		fmt.Sprintf("http://%s:%d/api/internal", service.address, service.port),
+		fmt.Sprintf("http://%s:%d/api/action", service.address, service.port),
 		nil,
 	)
 
