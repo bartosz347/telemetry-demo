@@ -40,7 +40,7 @@ func main() {
 		log.Fatal("FATAL: APP_NAME not set!")
 	}
 
-	// Load services to call
+	// Load services to call list
 	servicesStr, ok := os.LookupEnv("SERVICES_TO_CALL")
 	if ok && servicesStr != "" {
 		servicesStr = strings.ReplaceAll(servicesStr, " ", "")
@@ -73,7 +73,7 @@ func main() {
 	// Start the HTTP server
 	// Wrap `actionHandler` in OpenTelemetry middleware that provides tracing
 	otelActionHandler := otelhttp.NewHandler(http.HandlerFunc(actionHandler), "/api/action")
-	// Setup the endpoint
+	// Setup the `/api/action` endpoint
 	http.Handle("/api/action", otelActionHandler)
 
 	// Setup health check endpoint (without tracing)
@@ -81,11 +81,6 @@ func main() {
 
 	log.Println("INFO: Starting HTTP server")
 	log.Fatalf("ERROR: %s", http.ListenAndServe(":8080", nil))
-}
-
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-	fmt.Fprint(w, "OK")
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
@@ -102,8 +97,10 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// do internal work
+	// add an event in main span indicating internal processing
 	trace.SpanFromContext(r.Context()).AddEvent("Starting internal processing")
+
+	// start new span indicating internal processing
 	tr := otel.Tracer("tracer/internal")
 	_, span := tr.Start(
 		r.Context(),
@@ -113,9 +110,12 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 	startInternal := time.Now()
 
+	// get loop complexity parameter from request query string
 	multiplier := GetMultiplier(r.URL.Query().Get("config"))
+	// run dummy loop simulating internal processing
 	runDummyLoop(multiplier)
 
+	// register measured processing time (internal part only – loop)
 	elapsedTimeInternal := time.Since(startInternal)
 	promLatencyHistogram.WithLabelValues("internal-only", "OK").Observe(elapsedTimeInternal.Seconds())
 	otelLatencyRecorder.Record(context.Background(), elapsedTimeInternal.Seconds(),
@@ -124,6 +124,7 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		attribute.Key("type").String("internal-only"),
 	)
 
+	// return HTTP response
 	if allRequestsSuccessful {
 		w.WriteHeader(200)
 		fmt.Fprint(w, "OK")
@@ -132,6 +133,8 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "ERROR")
 	}
 
+	// register measured operation time (total = dummy loop + time spent on waiting for response from other microservices)
+	// status attribute depends on whether responses from other microservices were successful
 	elapsedTime := time.Since(start)
 	if allRequestsSuccessful {
 		// Prometheus metrics
@@ -150,4 +153,9 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 			attribute.Key("type").String("total"),
 		)
 	}
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	fmt.Fprint(w, "OK")
 }
