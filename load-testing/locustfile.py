@@ -1,9 +1,7 @@
 from locust import HttpUser, task, between, constant, constant_pacing
-# from locust.contrib.fasthttp import FastHttpUser
 from locust import LoadTestShape
 
 host = "http://localhost:8081"
-
 
 class SiteUser(HttpUser):
     wait_time = between(1, 2)
@@ -12,5 +10,5 @@ class SiteUser(HttpUser):
     host = host
 
     @task
-    def trafficCamera(self):
+    def callAction(self):
         self.client.get("/api/action")

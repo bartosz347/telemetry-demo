@@ -10,6 +10,7 @@ services:
       - "14250"
     command: --memory.max-traces=10000
 
+  # Collector
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.30.0
     command: [ "--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}", "--log-level=WARN" ]
@@ -20,13 +21,14 @@ services:
     ports:
       - "1888:1888"   # pprof extension
       - "8888:8888"   # Prometheus metrics exposed by the collector
-      - "0.0.0.0:8889:8889"   # Prometheus exporter metrics
+      - "8889:8889"   # Prometheus exporter metrics
       - "13133:13133" # health_check extension
       - "4317"        # OTLP gRPC receiver
       - "55670:55679" # zpages extension
     depends_on:
       - jaeger-all-in-one
 
+  # Agent
   otel-agent:
     image: otel/opentelemetry-collector-contrib:0.30.0
     command: [ "--config=/etc/otel-agent-config.yaml", "${OTELCOL_ARGS}" ]
@@ -37,8 +39,8 @@ services:
       - "14250"       # Jaeger grpc receiver
       - "14268"       # Jaeger http thrift receiver
       - "55678"       # OpenCensus receiver
-      - "0.0.0.0:4317:4317"        # OTLP gRPC receiver
-      - "0.0.0.0:9411:9411" # Zipkin HTTP receiver ?
+      - "4317:4317"        # OTLP gRPC receiver
+      - "9411:9411" # Zipkin HTTP receiver ?
       - "1777:1777"   # pprof extension
       - "55679:55679" # zpages extension
       - "13133"       # health_check
@@ -46,13 +48,15 @@ services:
       - otel-collector
 
   prometheus:
+    #    container_name: prometheus
     image: prom/prometheus:v2.28.1
     volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./prometheus_basic.yaml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     ports:
       - "9090:9090"
     command: [ "--config.file=/etc/prometheus/prometheus.yml","--storage.tsdb.path=/prometheus", "--web.console.libraries=/usr/share/prometheus/console_libraries", "--web.console.templates=/usr/share/prometheus/consoles", "--enable-feature=promql-at-modifier" ]
+
 
   grafana:
     image: grafana/grafana
@@ -70,17 +74,34 @@ services:
     expose:
       - 8081
 
+  # Load testing
+  locust-master:
+    image: locustio/locust:1.6.0
+    ports:
+      - "8089:8089"
+    volumes:
+      - ../load-testing:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --master -H "http://app1:8080"
+
+  locust-worker:
+    image: locustio/locust:1.6.0
+    volumes:
+      - ../load-testing:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
+    scale: 2
+
+
   app1:
     build: ../
     environment:
       APP_NAME: app1
       OTEL_AGENT: otel-agent:4317
-      SERVICES_TO_CALL: haproxy:8082,haproxy:8083
+      SERVICES_TO_CALL: app2:8080,app3:8080
     depends_on:
       - app2
       - app3
-    scale: 1
-#    cpus: 0.5
+    ports:
+      - 8081:8080
 
   app2:
     build: ../
@@ -88,7 +109,6 @@ services:
       APP_NAME: app2
       OTEL_AGENT: otel-agent:4317
       SERVICES_TO_CALL:
-    scale: 1
 
   app3:
     build: ../
@@ -96,15 +116,6 @@ services:
       APP_NAME: app3
       OTEL_AGENT: otel-agent:4317
       SERVICES_TO_CALL:
-
-  haproxy:
-    image: haproxy:2.4
-    ports:
-      - "1936:1936" # stats
-      - "8081:8081" # app1
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-
 
 volumes:
   grafana-data:
