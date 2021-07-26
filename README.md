@@ -99,7 +99,6 @@ docker-compose -f docker-compose.yaml up -d
 
 Rebuild the images
 ```sh
-cd deployment
 docker-compose -f docker-compose.yaml up -d --build
 ```
 
