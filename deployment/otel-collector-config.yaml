@@ -7,12 +7,12 @@ receivers:
   otlp/spanmetrics:
     protocols:
       grpc:
-        endpoint: "localhost:12345"      
+        endpoint: "localhost:12345"
 
   otlp/spanmetrics_output:
     protocols:
       grpc:
-        endpoint: "localhost:55677"          
+        endpoint: "localhost:55677"
 
 exporters:
   prometheus:
@@ -42,11 +42,11 @@ processors:
 
   spanmetrics:
     metrics_exporter: otlp/spanmetrics
-    latency_histogram_buckets: [1ms, 5ms, 10ms,20ms, 30ms,40ms,50ms,60ms,70ms,80ms,90ms,100ms,120ms, 140ms,160ms, 180ms,200ms,250ms, 300ms,400ms,500ms,600ms,700ms, 800ms,900ms, 1000ms, 2000ms, 3000ms,4000ms,5000ms,6000ms,8000ms, 10000ms,15000ms,20000ms, 60000ms]
+    latency_histogram_buckets: [ 0.01s,0.018000000000000002s,0.032400000000000005s,0.05832000000000001s,0.10497600000000003s,0.18895680000000006s,0.34012224000000013s,0.6122200320000003s,1.1019960576000005s,1.983592903680001s, 3.570467226624002s, 6.426841007923204s, 11.568313814261767s, 20.82296486567118s, 37.48133675820813s, 67.46640616477464s, 121.43953109659435s, 218.59115597386983s, 393.4640807529657s, 708.2353453553383 ]
     dimensions:
       - name: http.method
         default: GET
-      - name: http.status_code      
+      - name: http.status_code
 
 extensions:
   health_check:
