@@ -18,6 +18,7 @@ func runDummyLoop(multiplier int) {
 	}
 }
 
+// GetMultiplier determines complexity parameter provided in query params or returns default value if none given
 func GetMultiplier(complexityConfig string) int {
 	if complexityConfig != "" {
 		set := strings.Split(complexityConfig, ",")
@@ -37,6 +38,7 @@ func GetMultiplier(complexityConfig string) int {
 	return 100
 }
 
+// Split splits a string into two slices
 func Split(s, sep string) (string, string) {
 	if len(s) == 0 {
 		return s, s

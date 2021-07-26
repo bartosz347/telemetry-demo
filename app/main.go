@@ -107,6 +107,7 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		"internal-processing",
 		trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")),
 	)
+	// `defer` means that span.End() will be called after executing all statements in the function
 	defer span.End()
 	startInternal := time.Now()
 
