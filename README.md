@@ -122,7 +122,7 @@ The following metrics are available in Prometheus for each microservice:
 
 `<APP_NAME>` – name of the application (`APP_NAME` variable), e.g. `app1`
 
-[Click to open an example for `app1`](http://localhost:9090/graph?g0.expr=histogram_quantile(0.95%2C%20sum(rate(app1_operation_latency_bucket%7Bstatus%3D%22OK%22%2C%20type%3D%22internal-only%22%7D%5B1m%5D))%20by%20(le))%20*%201000&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=15m&g1.expr=histogram_quantile(0.95%2C%20sum(rate(otel_app1_operation_latency_bucket%7Bstatus%3D%22OK%22%2C%20type%3D%22internal-only%22%7D%5B1m%5D))%20by%20(le))%20*%201000&g1.tab=0&g1.stacked=0&g1.show_exemplars=0&g1.range_input=15m&g2.expr=histogram_quantile(0.95%2C%20rate(otel_latency_bucket%7Bservice_name%3D%22app1%22%2C%20operation%3D%22internal-processing%22%7D%5B1m%5D))&g2.tab=0&g2.stacked=0&g2.show_exemplars=0&g2.range_input=15m) 
+[Click to open a Prometheus example for `app1`](http://localhost:9090/graph?g0.expr=histogram_quantile(0.95%2C%20sum(rate(app1_operation_latency_bucket%7Bstatus%3D%22OK%22%2C%20type%3D%22internal-only%22%7D%5B1m%5D))%20by%20(le))%20*%201000&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=15m&g1.expr=histogram_quantile(0.95%2C%20sum(rate(otel_app1_operation_latency_bucket%7Bstatus%3D%22OK%22%2C%20type%3D%22internal-only%22%7D%5B1m%5D))%20by%20(le))%20*%201000&g1.tab=0&g1.stacked=0&g1.show_exemplars=0&g1.range_input=15m&g2.expr=histogram_quantile(0.95%2C%20rate(otel_latency_bucket%7Bservice_name%3D%22app1%22%2C%20operation%3D%22internal-processing%22%7D%5B1m%5D))&g2.tab=0&g2.stacked=0&g2.show_exemplars=0&g2.range_input=15m) 
 
 ## Notes
 
