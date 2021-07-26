@@ -28,7 +28,7 @@ func InitOpenTelemetry(serviceName string, instanceId string, otelAgentAddr stri
 	exp, err := otlp.NewExporter(ctx, otlpgrpc.NewDriver(
 		otlpgrpc.WithInsecure(),
 		otlpgrpc.WithEndpoint(otelAgentAddr),
-		otlpgrpc.WithDialOption(grpc.WithBlock()), // useful for testing
+		otlpgrpc.WithDialOption(grpc.WithBlock()), // block until connected, useful for testing
 	))
 
 	if err != nil {
@@ -38,8 +38,7 @@ func InitOpenTelemetry(serviceName string, instanceId string, otelAgentAddr stri
 	// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
 	// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
 	tp := trace.NewTracerProvider(
-		trace.WithSampler(trace.AlwaysSample()), // TODO when to sample?
-		//sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.NeverSample())),
+		trace.WithSampler(trace.AlwaysSample()), // All traces are sampled
 		trace.WithBatcher(exp),
 		trace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String(serviceName))),
 	)

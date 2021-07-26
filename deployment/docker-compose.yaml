@@ -1,7 +1,7 @@
 version: "2.2"
 services:
-
-  # Jaeger
+  # === Section 1 - tools ===
+  ## Jaeger
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:1.24
     ports:
@@ -16,7 +16,6 @@ services:
     # command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-
     ports:
       - "1888:1888"   # pprof extension
       - "8888:8888"   # Prometheus metrics exposed by the collector
@@ -87,6 +86,8 @@ services:
     scale: 2
 
 
+
+  # === Section 2 - applications ===
   app1:
     build: ../
     environment:
@@ -107,6 +108,7 @@ services:
       OTEL_AGENT: otel-agent:4317
       SERVICES_TO_CALL:
     scale: 1
+    cpus: 0.5
 
   app3:
     build: ../
@@ -114,7 +116,12 @@ services:
       APP_NAME: app3
       OTEL_AGENT: otel-agent:4317
       SERVICES_TO_CALL:
+    scale: 1
+    cpus: 0.5
 
+
+
+  # === Section 3 - reverse proxy ===
   haproxy:
     image: haproxy:2.4
     ports:

@@ -108,12 +108,12 @@ docker-compose -f docker-compose.yaml up -d --build
 The following metrics are available in Prometheus for each microservice:
 
 1. **Native Prometheus metrics**
-   `<APP_NAME>_operation_latency_bucket{status="OK|ERROR", type="internal-only|total"}`  
+   `<APP_NAME>_operation_latency_bucket{status="OK|ERROR", type="internal-only|total"}`    
    Labels:  
    * `type=total` – whole request processing time (internal processing + external service calls)
    * `type=internal-only` – internal processing time (only dummy loop)
 2. **OpenTelemetry metrics** (metrics collected with OpenTelemetry and exported for Prometheus)
-   `otel_<APP_NAME>_operation_latency_bucket{status="OK|ERROR", type="internal-only|total"}`
+   `otel_<APP_NAME>_operation_latency_bucket{status="OK|ERROR", type="internal-only|total"}`  
    Labels:
    * `type=total` – whole request processing time (internal processing + external service calls)
    * `type=internal-only` – internal processing time (only dummy loop)   

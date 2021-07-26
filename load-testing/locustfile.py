@@ -12,3 +12,5 @@ class SiteUser(HttpUser):
     @task
     def callAction(self):
         self.client.get("/api/action")
+        # Custom complexity example:
+        # self.client.get("/api/action?config=app1:100000,app2:1000,app3:1000")
